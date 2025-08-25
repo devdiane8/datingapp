@@ -19,7 +19,7 @@ export class ToastService {
 
   }
 
-  private createToastElement(message: string, alertClass: string, duration = 500) {
+  private createToastElement(message: string, alertClass: string, duration = 1000) {
 
     const toastContainner = document.getElementById('toast-container');
     if (!toastContainner) {
@@ -28,7 +28,7 @@ export class ToastService {
     }
     const toast = document.createElement('div');
     toast.classList.add('alert', alertClass, 'shadow-lg');
-    toast.innerText = `
+    toast.innerHTML = `
       <span>${message}</span>
       <button class="ml-4 btn btn-sm btn-ghost">X</button>
     `;
