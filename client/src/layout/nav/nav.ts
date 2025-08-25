@@ -3,9 +3,11 @@ import { AccountService } from '../../core/services/account-service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ToastService } from '../../core/services/toast-service';
+import { CommonModule } from '@angular/common';
 @Component({
   selector: 'app-nav',
-  imports: [FormsModule, RouterLink, RouterLinkActive],
+  standalone: true,
+  imports: [FormsModule, RouterLink, RouterLinkActive, CommonModule],
   templateUrl: './nav.html',
   styleUrl: './nav.css'
 })
