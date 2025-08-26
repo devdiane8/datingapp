@@ -7,28 +7,25 @@ import { provideHttpClient, withInterceptors } from '@angular/common/http';
 import { InitService } from '../core/services/init-service';
 import { last, lastValueFrom } from 'rxjs';
 import { errorInterceptor } from '../core/interceptors/error-interceptor';
+import { jwtInterceptor } from '../core/interceptors/jwt-interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideBrowserGlobalErrorListeners(),
     provideZonelessChangeDetection(),
     provideRouter(routes, withViewTransitions()),
-    provideHttpClient(withInterceptors([errorInterceptor])),// Ensure HttpClient is provided
-    // provideAppInitializer(async () => {
-    //   const initService = inject(InitService);
-    //   return new Promise(resolve => {
-    //     setTimeout(() => {
-    //       try {
-    //         return lastValueFrom(initService.init());
-    //       } finally {
-    //         const splach = document.getElementById('initial-splash');
-    //         if (splach) {
-    //           splach.remove();
-    //         }
-    //       }
-    //     }, 1000);
-    //   })
-    // })
+    provideHttpClient(withInterceptors([errorInterceptor, jwtInterceptor])),// Ensure HttpClient is provided
+    provideAppInitializer(async () => {
+      const initService = inject(InitService);
+      try {
+        return await lastValueFrom(initService.init());
+      } finally {
+        const splash = document.getElementById('initial-splash');
+        if (splash) {
+          splash.remove();
+        }
+      }
+    })
 
   ]
 };

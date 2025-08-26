@@ -8,7 +8,7 @@ public class UserDto
     public required string DisplayName { get; set; }
     public required string Email { get; set; }
 
-    public string? imageUrl { get; set; }
+    public string? ImageUrl { get; set; }
 
     public required string Token { get; set; }
 

@@ -1,9 +1,10 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, OnInit, signal } from '@angular/core';
 import { AccountService } from '../../core/services/account-service';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ToastService } from '../../core/services/toast-service';
 import { CommonModule } from '@angular/common';
+import { themes } from '../theme';
 @Component({
   selector: 'app-nav',
   standalone: true,
@@ -11,13 +12,31 @@ import { CommonModule } from '@angular/common';
   templateUrl: './nav.html',
   styleUrl: './nav.css'
 })
-export class Nav {
+export class Nav implements OnInit {
 
   protected accountService = inject(AccountService);
   private router = inject(Router);
   private toast = inject(ToastService);
+  protected selectedTheme = signal<string>(localStorage.getItem('theme') || 'light');
+  protected themes = themes;
 
   protected creds: any = {};
+
+  ngOnInit(): void {
+    document.documentElement.setAttribute('data-theme', this.selectedTheme());
+  }
+
+  handleSelectTheme(theme: string) {
+    this.selectedTheme.set(theme);
+    localStorage.setItem('theme', theme);
+    document.documentElement.setAttribute('data-theme', theme);
+    const element = document.activeElement as HTMLDivElement;
+    if (element) {
+      element.blur();
+    }
+  }
+
+
 
   login() {
     this.accountService.login(this.creds.email, this.creds.password).subscribe(
