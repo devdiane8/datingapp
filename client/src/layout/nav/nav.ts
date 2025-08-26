@@ -5,6 +5,7 @@ import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { ToastService } from '../../core/services/toast-service';
 import { CommonModule } from '@angular/common';
 import { themes } from '../theme';
+import { BusyService } from '../../core/services/busy-service';
 @Component({
   selector: 'app-nav',
   standalone: true,
@@ -19,6 +20,7 @@ export class Nav implements OnInit {
   private toast = inject(ToastService);
   protected selectedTheme = signal<string>(localStorage.getItem('theme') || 'light');
   protected themes = themes;
+  protected busyService = inject(BusyService);
 
   protected creds: any = {};
 
