@@ -23,7 +23,7 @@ export class AccountService {
       })
     );
   }
-  regster(creds: RegisterCreds) {
+  register(creds: RegisterCreds) {
     return this.http.post<User>(this.baseUrl + 'account/register', creds).pipe(
       tap(user => {
         if (user) {

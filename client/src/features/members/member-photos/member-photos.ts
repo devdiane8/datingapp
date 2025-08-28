@@ -11,7 +11,7 @@ import { DeleteButton } from '../../../shared/delete-button/delete-button';
 
 @Component({
   selector: 'app-member-photos',
-  imports: [ImageUpload,StarButton,DeleteButton],
+  imports: [ImageUpload, StarButton, DeleteButton],
   templateUrl: './member-photos.html',
   styleUrl: './member-photos.css'
 })
@@ -44,6 +44,9 @@ export class MemberPhotos implements OnInit {
         this.memberService.editMode.set(false);
         this.loading.set(false);
         this.photos.update(photos => [...photos, photo]);
+        if (!this.memberService.member()?.imageUrl) {
+          this.setMainLocalPhoto(photo);
+        }
 
       },
       error: error => {
@@ -71,6 +74,18 @@ export class MemberPhotos implements OnInit {
         this.loading.set(false);
       }
     })
+  }
+  private setMainLocalPhoto(photo: Photo) {
+    const currentUser = this.accountService.currentUser();
+    if (currentUser && currentUser.id === this.memberService.member()?.id) {
+      currentUser.imageUrl = photo.url;
+      this.accountService.setCurrentUser(currentUser as User);
+    }
+    this.memberService.member.update(member => ({
+      ...member,
+      imageUrl: photo.url
+
+    }) as Member);
   }
   deletePhoto(photoId: number) {
     const photo = this.photos().find(x => x.id === photoId);
