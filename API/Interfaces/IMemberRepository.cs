@@ -8,14 +8,12 @@ public interface IMemberRepository
 {
 
 
-    void UpdateMember(Member member);
+   void Update(Member member);
     Task<bool> SaveAllAsync();
-    Task<PaginatedResult<Member>> GetAllMembersAsync( MemberParams memberParams);
+    Task<PaginatedResult<Member>> GetMembersAsync(MemberParams memberParams);
     Task<Member?> GetMemberByIdAsync(string id);
-
-    Task<IReadOnlyList<Photo>> GetMemberPhotosAsync(string memberId);
-
-    Task<Member?> GetMemberForupdate(string id);
+    Task<IReadOnlyList<Photo>> GetPhotosForMemberAsync(string memberId);
+    Task<Member?> GetMemberForUpdate(string id);
 
 
 

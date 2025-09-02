@@ -8,30 +8,12 @@ namespace API.Data;
 
 public class MemberRepository(AppDBContext context) : IMemberRepository
 {
-    public async Task<PaginatedResult<Member>> GetAllMembersAsync(MemberParams memberParams)
-    {
-        var query = context.Members.AsQueryable();
-
-        query = query.Where(x => x.Id != memberParams.CurrentMemberId);
-        if (memberParams.Gender != null)
-        {
-            query = query.Where(x => x.Gender == memberParams.Gender);
-        }
-        var minDoB = DateOnly.FromDateTime(DateTime.Today.AddYears(-memberParams.MaxAge -1));
-        var maxDoB = DateOnly.FromDateTime(DateTime.Today.AddYears(-memberParams.MinAge));
-        query = query.Where(x => x.DateOfBirth >= minDoB && x.DateOfBirth <= maxDoB);
-        return await PaginationHelper.CreateAsync(query,
-        memberParams.PageNumber, memberParams.PageSize);
-
-    }
-
     public async Task<Member?> GetMemberByIdAsync(string id)
     {
-        return await context.Members
-            .FirstOrDefaultAsync(x => x.Id.ToLower() == id.ToLower());
+        return await context.Members.FindAsync(id);
     }
 
-    public async Task<Member?> GetMemberForupdate(string id)
+    public async Task<Member?> GetMemberForUpdate(string id)
     {
         return await context.Members
             .Include(x => x.User)
@@ -39,20 +21,46 @@ public class MemberRepository(AppDBContext context) : IMemberRepository
             .SingleOrDefaultAsync(x => x.Id == id);
     }
 
-    public async Task<IReadOnlyList<Photo>> GetMemberPhotosAsync(string memberId)
+    public async Task<PaginatedResult<Member>> GetMembersAsync(MemberParams memberParams)
     {
-        return await context.Members.Where(x => x.Id == memberId)
-             .SelectMany(x => x.Photos)
-             .ToListAsync();
+        var query = context.Members.AsQueryable();
+
+        query = query.Where(x => x.Id != memberParams.CurrentMemberId);
+
+        if (memberParams.Gender != null)
+        {
+            query = query.Where(x => x.Gender == memberParams.Gender);
+        }
+
+        var minDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-memberParams.MaxAge - 1));
+        var maxDob = DateOnly.FromDateTime(DateTime.Today.AddYears(-memberParams.MinAge));
+
+        query = query.Where(x => x.DateOfBirth >= minDob && x.DateOfBirth <= maxDob);
+
+        query = memberParams.OrderBy switch
+        {
+            "created" => query.OrderByDescending(x => x.Created),
+            _ => query.OrderByDescending(x => x.LastActive)
+        };
+
+        return await PaginationHelper.CreateAsync(query,
+                memberParams.PageNumber, memberParams.PageSize);
+    }
+
+    public async Task<IReadOnlyList<Photo>> GetPhotosForMemberAsync(string memberId)
+    {
+        return await context.Members
+            .Where(x => x.Id == memberId)
+            .SelectMany(x => x.Photos)
+            .ToListAsync();
     }
 
     public async Task<bool> SaveAllAsync()
     {
         return await context.SaveChangesAsync() > 0;
-
     }
 
-    public void UpdateMember(Member member)
+    public void Update(Member member)
     {
         context.Entry(member).State = EntityState.Modified;
     }
