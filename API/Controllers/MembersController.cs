@@ -3,6 +3,7 @@ using API.Data;
 using API.Dtos;
 using API.Entities;
 using API.Extentions;
+using API.Helpers;
 using API.Interfaces;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -17,9 +18,11 @@ namespace API.Controllers
     public class MembersController(IMemberRepository memberRepository, IPhotoService photoService) : BaseApiController
     {
         [HttpGet]
-        public async Task<ActionResult<IReadOnlyList<Member>>> GetMembers()
+        public async Task<ActionResult<IReadOnlyList<Member>>> GetMembers([FromQuery] MemberParams memberParams)
+
         {
-            return Ok(await memberRepository.GetAllMembersAsync());
+            memberParams.CurrentMemberId = User.GetMemberId();
+            return Ok(await memberRepository.GetAllMembersAsync(memberParams));
 
         }
 
@@ -119,9 +122,9 @@ namespace API.Controllers
             {
                 return BadRequest("this photo can not be deleted");
             }
-            if(photo.PublicId != null)
+            if (photo.PublicId != null)
             {
-               var result = await photoService.DeletePhotoAsync(photo.PublicId);
+                var result = await photoService.DeletePhotoAsync(photo.PublicId);
                 if (result.Error != null)
                 {
                     return BadRequest(result.Error.Message);
