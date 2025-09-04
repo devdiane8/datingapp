@@ -22,7 +22,7 @@ namespace API.Controllers
 
         {
             memberParams.CurrentMemberId = User.GetMemberId();
-            return Ok(await memberRepository.GetAllMembersAsync(memberParams));
+            return Ok(await memberRepository.GetMembersAsync(memberParams));
 
         }
 
@@ -36,13 +36,13 @@ namespace API.Controllers
         [HttpGet("{memberId}/photos")]
         public async Task<ActionResult<IReadOnlyList<Photo>>> GetMemberPhotos(string memberId)
         {
-            return Ok(await memberRepository.GetMemberPhotosAsync(memberId));
+            return Ok(await memberRepository.GetPhotosForMemberAsync(memberId));
         }
         [HttpPut]
         public async Task<ActionResult> UpdateMember([FromBody] MemberUpdateDto memberUpdateDto)
         {
             var memberId = User.GetMemberId();
-            var member = await memberRepository.GetMemberForupdate(memberId);
+            var member = await memberRepository.GetMemberForUpdate(memberId);
             if (member == null)
             {
                 return BadRequest("Opps! No member found ");
@@ -52,14 +52,14 @@ namespace API.Controllers
             member.City = memberUpdateDto.City ?? member.City;
             member.Country = memberUpdateDto.Country ?? member.Country;
             member.User.DisplayName = memberUpdateDto.DisplayName ?? member.User.DisplayName;
-            memberRepository.UpdateMember(member);
+            memberRepository.Update(member);
             if (await memberRepository.SaveAllAsync()) return NoContent();
             return BadRequest("Failed to update member");
         }
         [HttpPost("add-photo")]
         public async Task<ActionResult<Photo>> AddPhoto([FromForm] IFormFile file)
         {
-            var member = await memberRepository.GetMemberForupdate(User.GetMemberId());
+            var member = await memberRepository.GetMemberForUpdate(User.GetMemberId());
             if (member == null)
             {
                 return BadRequest("Connot Update member");
@@ -92,7 +92,7 @@ namespace API.Controllers
         [HttpPut("set-main-photo/{photoId}")]
         public async Task<ActionResult> SetMainPhoto(int photoId)
         {
-            var member = await memberRepository.GetMemberForupdate(User.GetMemberId());
+            var member = await memberRepository.GetMemberForUpdate(User.GetMemberId());
             if (member == null)
             {
                 return BadRequest("Connot Update member");
@@ -112,7 +112,7 @@ namespace API.Controllers
         [HttpDelete("delete-photo/{photoId}")]
         public async Task<ActionResult> DeletePhoto(int photoId)
         {
-            var member = await memberRepository.GetMemberForupdate(User.GetMemberId());
+            var member = await memberRepository.GetMemberForUpdate(User.GetMemberId());
             if (member == null)
             {
                 return BadRequest("Connot Update member");

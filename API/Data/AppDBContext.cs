@@ -13,25 +13,36 @@ public class AppDBContext(DbContextOptions dbContextOptions) : DbContext(dbConte
 
     public DbSet<Photo> Photos { get; set; }
 
+    public DbSet<MemberLike> Likes { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+        modelBuilder.Entity<MemberLike>()
+                .HasKey(x => new { x.SourceMemberId, x.TargetMemberId });
+        modelBuilder.Entity<MemberLike>()
+                .HasOne(x => x.SourceMember)
+                .WithMany(x => x.LikedByMembers)
+                .HasForeignKey(x => x.SourceMemberId)
+                .OnDelete(DeleteBehavior.Cascade);
+        modelBuilder.Entity<MemberLike>()
+                .HasOne(x => x.TargetMember)
+                .WithMany(x => x.LikedMembers)
+                .HasForeignKey(x => x.TargetMemberId)
+                .OnDelete(DeleteBehavior.Cascade);
         var dateTimeConverter = new ValueConverter<DateTime, DateTime>(
             x => x.ToUniversalTime(),
             x => DateTime.SpecifyKind(x, DateTimeKind.Utc));
 
         foreach (var entityType in modelBuilder.Model.GetEntityTypes())
         {
-                
-                foreach (var property in entityType.GetProperties())
+            foreach (var property in entityType.GetProperties())
+            {
+                if (property.ClrType == typeof(DateTime))
                 {
-                    if (property.ClrType == typeof(DateTime))
-                    {
-                        property.SetValueConverter(dateTimeConverter);
-                    }
+                    property.SetValueConverter(dateTimeConverter);
                 }
             }
-
-
+        }
     }
 }
